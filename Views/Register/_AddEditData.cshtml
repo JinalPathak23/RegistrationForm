@@ -1,0 +1,164 @@
+﻿@model FormData
+
+<!-- CSS only -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-JeGy9x1NwXvxJSV6vK8OxVlKz57PFtpJLdA/6+3+1qMEUQFvpMAWdAgaYB/E1Kkh" crossorigin="anonymous">
+
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-UYBAZjZRbYlKvFcJ7MXLUM54K/PViWLy1r58t4dV9zqZ1/4jTMBxY3hUcTnpWv5B" crossorigin="anonymous"></script>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add/Edit Form data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="RegisterForm" asp-controller="Register" asp-action="Save">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input asp-for="Name" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input asp-for="Email" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input asp-for="Phone" class="form-control" />
+
+                    </div>
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>State:</label>
+                        <select id="stateDropdown" class="form-control" asp-for="State">
+                            <option value="">Select State</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>City:</label>
+                        <select id="cityDropdown" class="form-control" asp-for="City"></select>
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="agreeCheckbox">
+                        <label class="form-check-label" for="agreeCheckbox">Agree?</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="submitButton">Save</button>
+                        <button type="button" data-bs-dismiss="modal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        // Disable submit button by default
+        $('#submitButton').prop('disabled', true);
+
+        // Enable submit button when agree checkbox is checked
+        $('#agreeCheckbox').change(function () {
+            if ($(this).is(':checked')) {
+                $('#submitButton').prop('disabled', false);
+            } else {
+                $('#submitButton').prop('disabled', true);
+            }
+        });
+        // Populate state dropdown and select the existing state
+        var selectedState = '@Model.State';
+        $('#stateDropdown').val(selectedState);
+
+        // Populate city dropdown based on selected state
+        var state = $('#stateDropdown').val();
+        var cities = [];
+
+        if (state === "Gujarat") {
+            cities = ["Surat", "Bardoli", "Baroda"];
+        } else if (state === "Maharashtra") {
+            cities = ["Mumbai", "Pune"];
+        }
+
+        var cityDropdown = $('#cityDropdown');
+        cityDropdown.empty();
+        $.each(cities, function (index, value) {
+            cityDropdown.append('<option value="' + value + '">' + value + '</option>');
+        });
+
+        // Select the existing city
+        var selectedCity = '@Model.City';
+        if (selectedCity !== '') {
+            cityDropdown.val(selectedCity);
+        }
+
+        // Handle state change event
+        $('#stateDropdown').change(function () {
+            var selectedState = $(this).val();
+            var cities = [];
+
+            if (selectedState === "Gujarat") {
+                cities = ["Surat", "Bardoli", "Baroda"];
+            } else if (selectedState === "Maharashtra") {
+                cities = ["Mumbai", "Pune"];
+            }
+
+            var cityDropdown = $('#cityDropdown');
+            cityDropdown.empty();
+            $.each(cities, function (index, value) {
+                cityDropdown.append('<option value="' + value + '">' + value + '</option>');
+            });
+        });
+
+        $('#RegisterForm').on('submit', function (e) {
+            // Prevent the form from submitting
+            e.preventDefault();
+
+            // Check if the required fields are filled
+            var isValid = true;
+            var requiredFields = [
+                { id: '#Name', message: 'Please enter name.' },
+                { id: '#Email', message: 'Please enter email.' },
+                { id: '#Phone', message: 'Please enter phone.' },
+                { id: '#stateDropdown', message: 'Please select state.' }
+            ];
+
+            // Check if required fields are filled
+            $.each(requiredFields, function (index, field) {
+                if ($(field.id).val() === '') {
+                    isValid = false;
+                    alert(field.message);
+                    return false; // break the loop
+                }
+            });
+
+            // Custom validation for email format
+            var emailRegex = /^\S+@@\S+\.\S+$/;
+            if (isValid && !emailRegex.test($('#Email').val())) {
+                isValid = false;
+                alert('Please enter a valid email address.(Ex:example@gmail.com)');
+                return;
+            }
+
+
+            // Custom validation for phone number format
+            var phoneRegex = /^\d{10}$/;
+            if (isValid && !phoneRegex.test($('#Phone').val())) {
+                isValid = false;
+                alert('Please enter a valid phone number.');
+                return;
+            }
+
+            // If all required fields are filled and custom validations pass, submit the form
+            if (isValid) {
+                this.submit();
+            }
+        });
+      
+    });
+</script>

@@ -1,0 +1,8 @@
+CREATE PROCEDURE [dbo].[GetData]
+AS
+BEGIN
+    SELECT * FROM FormDatas
+END
+GO
+
+
